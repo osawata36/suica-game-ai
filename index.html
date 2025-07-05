@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suica Game AI</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        
+        canvas {
+            border: 3px solid #333;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #ff5252;
+        }
+        
+        .next-fruit {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Suica Game AI</h1>
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="next-fruit">Next: <span id="next-fruit">🍒</span></div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="controls">
+            <button id="startBtn">Start Game</button>
+            <button id="restartBtn">Restart</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

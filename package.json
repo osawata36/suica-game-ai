@@ -1,0 +1,13 @@
+{
+  "name": "suica-game-ai",
+  "version": "1.0.0",
+  "description": "AI developed suica game",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --bind 0.0.0.0",
+    "dev": "python3 -m http.server 8000 --bind 0.0.0.0"
+  },
+  "keywords": ["game", "suica", "ai", "html5", "canvas"],
+  "author": "",
+  "license": "MIT"
+}

@@ -8,7 +8,7 @@ class SuicaGame {
         this.fruits = [];
         this.score = 0;
         this.gameState = 'menu';
-        this.dangerLine = this.height * 0.1;
+        this.dangerLine = this.height * 0.15;
         this.gravity = 0.3;
         this.friction = 0.99;
         this.restitution = 0.3;
@@ -54,6 +54,49 @@ class SuicaGame {
         this.canvas.addEventListener('click', (e) => {
             if (this.gameState === 'playing' && this.canDrop) {
                 this.dropFruit();
+            }
+        });
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.gameState === 'playing') {
+                const rect = this.canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                this.dropPosition = Math.max(30, Math.min(this.width - 30, touch.clientX - rect.left));
+                if (this.canDrop) {
+                    this.dropFruit();
+                }
+            }
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (this.gameState === 'playing') {
+                const rect = this.canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                this.dropPosition = Math.max(30, Math.min(this.width - 30, touch.clientX - rect.left));
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (this.gameState === 'playing') {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.dropPosition = Math.max(30, this.dropPosition - 10);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.dropPosition = Math.min(this.width - 30, this.dropPosition + 10);
+                        break;
+                    case 'ArrowDown':
+                    case ' ':
+                        e.preventDefault();
+                        if (this.canDrop) {
+                            this.dropFruit();
+                        }
+                        break;
+                }
             }
         });
     }
@@ -182,7 +225,7 @@ class SuicaGame {
     
     checkGameOver() {
         for (let fruit of this.fruits) {
-            if (fruit.y - fruit.radius < this.dangerLine) {
+            if (fruit.y - fruit.radius < this.dangerLine && fruit.vy <= 0) {
                 this.gameState = 'gameover';
                 return true;
             }

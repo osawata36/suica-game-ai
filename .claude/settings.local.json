@@ -5,7 +5,10 @@
       "Bash(git commit:*)",
       "Bash(curl:*)",
       "Bash(npm test:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(gh auth:*)",
+      "WebFetch(domain:osawata36.github.io)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }

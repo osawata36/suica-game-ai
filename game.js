@@ -13,6 +13,9 @@ class SuicaGame {
         this.friction = 0.99;
         this.restitution = 0.3;
         
+        // Initialize fruit renderer
+        this.fruitRenderer = new FruitRenderer();
+        
         this.fruitTypes = [
             { name: 'cherry', emoji: '🍒', color: '#ff1744', darkColor: '#c5185d', radius: 15, points: 10 },
             { name: 'strawberry', emoji: '🍓', color: '#ff5252', darkColor: '#d32f2f', radius: 20, points: 20 },
@@ -34,7 +37,10 @@ class SuicaGame {
         this.init();
     }
     
-    init() {
+    async init() {
+        // Load SVG images first
+        await this.fruitRenderer.loadAllFruits();
+        
         this.setupEventListeners();
         this.generateNextFruit();
         this.gameLoop();
@@ -113,45 +119,66 @@ class SuicaGame {
         const radius = fruit.radius;
         const fruitType = this.fruitTypes[fruit.type];
         
-        // Create gradient for 3D effect
-        const gradient = ctx.createRadialGradient(
-            x - radius * 0.3, y - radius * 0.3, 0,
-            x, y, radius
-        );
-        gradient.addColorStop(0, fruitType.color);
-        gradient.addColorStop(0.7, fruitType.darkColor);
-        gradient.addColorStop(1, fruitType.darkColor);
-        
-        // Draw shadow
-        ctx.save();
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.ellipse(x + 2, y + radius * 0.8, radius * 0.8, radius * 0.3, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-        
-        // Draw main fruit body
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add highlight for glossy effect
-        const highlightGradient = ctx.createRadialGradient(
-            x - radius * 0.3, y - radius * 0.3, 0,
-            x - radius * 0.3, y - radius * 0.3, radius * 0.4
-        );
-        highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-        highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        ctx.fillStyle = highlightGradient;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add fruit-specific details
-        this.drawFruitDetails(fruit, x, y, radius);
+        // Check if we have SVG for this fruit (but skip custom-drawn fruits)
+        if (this.fruitRenderer.hasSVG(fruitType.name) && !['strawberry', 'cherry', 'grape', 'orange', 'persimmon', 'apple', 'pear', 'peach', 'pineapple', 'melon', 'watermelon'].includes(fruitType.name)) {
+            this.fruitRenderer.drawFruit(ctx, fruitType.name, x, y, radius);
+        } else {
+            // Special cases for custom-drawn fruits - don't draw circle background
+            if (['strawberry', 'cherry', 'grape', 'orange', 'persimmon', 'apple', 'pear', 'peach', 'pineapple', 'melon', 'watermelon'].includes(fruitType.name)) {
+                // Draw shadow
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.ellipse(x + 2, y + radius * 0.8, radius * 0.8, radius * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                
+                // Draw custom fruit shape
+                this.drawFruitDetails(fruit, x, y, radius);
+            } else {
+                // Fallback to original rendering for other fruits without SVG
+                // Create gradient for 3D effect
+                const gradient = ctx.createRadialGradient(
+                    x - radius * 0.3, y - radius * 0.3, 0,
+                    x, y, radius
+                );
+                gradient.addColorStop(0, fruitType.color);
+                gradient.addColorStop(0.7, fruitType.darkColor);
+                gradient.addColorStop(1, fruitType.darkColor);
+                
+                // Draw shadow
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.ellipse(x + 2, y + radius * 0.8, radius * 0.8, radius * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                
+                // Draw main fruit body
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add highlight for glossy effect
+                const highlightGradient = ctx.createRadialGradient(
+                    x - radius * 0.3, y - radius * 0.3, 0,
+                    x - radius * 0.3, y - radius * 0.3, radius * 0.4
+                );
+                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = highlightGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add fruit-specific details
+                this.drawFruitDetails(fruit, x, y, radius);
+            }
+        }
     }
     
     drawFruitDetails(fruit, x, y, radius) {
@@ -162,123 +189,246 @@ class SuicaGame {
         
         switch(fruitType.name) {
             case 'cherry':
-                // Draw cherry stem
+                // Draw two cherries
+                const cherry1X = x - radius * 0.5;
+                const cherry2X = x + radius * 0.5;
+                const cherryY = y + radius * 0.2;
+                
+                // Cherry 1
+                ctx.fillStyle = '#c62828';
+                ctx.beginPath();
+                ctx.arc(cherry1X, cherryY, radius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#ff1744';
+                ctx.beginPath();
+                ctx.arc(cherry1X, cherryY, radius * 0.65, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Cherry 2
+                ctx.fillStyle = '#c62828';
+                ctx.beginPath();
+                ctx.arc(cherry2X, cherryY, radius * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#ff1744';
+                ctx.beginPath();
+                ctx.arc(cherry2X, cherryY, radius * 0.65, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Stems
                 ctx.strokeStyle = '#4a5d23';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(x, y - radius);
-                ctx.lineTo(x - 2, y - radius - 5);
+                ctx.moveTo(cherry1X, cherryY - radius * 0.6);
+                ctx.quadraticCurveTo(x - radius * 0.2, y - radius * 0.8, x, y - radius);
                 ctx.stroke();
-                // Add cherry highlight
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                
                 ctx.beginPath();
-                ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.25, 0, Math.PI * 2);
+                ctx.moveTo(cherry2X, cherryY - radius * 0.6);
+                ctx.quadraticCurveTo(x + radius * 0.2, y - radius * 0.8, x, y - radius);
+                ctx.stroke();
+                
+                // Highlights
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.beginPath();
+                ctx.arc(cherry1X - radius * 0.2, cherryY - radius * 0.2, radius * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(cherry2X - radius * 0.2, cherryY - radius * 0.2, radius * 0.2, 0, Math.PI * 2);
                 ctx.fill();
                 break;
                 
             case 'strawberry':
-                // Draw strawberry seeds
-                ctx.fillStyle = '#ffff8d';
-                for (let i = 0; i < 12; i++) {
-                    const angle = (i / 12) * Math.PI * 2;
-                    const seedX = x + Math.cos(angle) * radius * 0.6;
-                    const seedY = y + Math.sin(angle) * radius * 0.6;
+                // Make strawberry shape more realistic - wider at top, pointed at bottom
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                // Create heart-like strawberry shape
+                ctx.moveTo(x, y + radius);  // Bottom point
+                ctx.quadraticCurveTo(x - radius * 1.2, y, x - radius * 0.8, y - radius * 0.5);
+                ctx.quadraticCurveTo(x - radius * 0.6, y - radius * 0.9, x, y - radius * 0.7);
+                ctx.quadraticCurveTo(x + radius * 0.6, y - radius * 0.9, x + radius * 0.8, y - radius * 0.5);
+                ctx.quadraticCurveTo(x + radius * 1.2, y, x, y + radius);
+                ctx.fill();
+                
+                // Draw strawberry seeds pattern
+                ctx.fillStyle = '#f9e79f';
+                const seedPositions = [
+                    {sx: -0.3, sy: -0.4}, {sx: 0.3, sy: -0.4},
+                    {sx: -0.5, sy: 0}, {sx: 0, sy: 0}, {sx: 0.5, sy: 0},
+                    {sx: -0.3, sy: 0.4}, {sx: 0.3, sy: 0.4},
+                    {sx: 0, sy: -0.6}, {sx: -0.4, sy: 0.2}, {sx: 0.4, sy: 0.2}
+                ];
+                for (let pos of seedPositions) {
+                    const seedX = x + pos.sx * radius;
+                    const seedY = y + pos.sy * radius;
                     ctx.beginPath();
                     ctx.arc(seedX, seedY, 1, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                // Add strawberry top leaves
-                ctx.fillStyle = '#4caf50';
-                for (let i = 0; i < 5; i++) {
-                    const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
-                    const leafX = x + Math.cos(angle) * radius * 0.3;
-                    const leafY = y - radius + 2;
-                    ctx.beginPath();
-                    ctx.ellipse(leafX, leafY, 2, 4, angle, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                break;
-                
-            case 'grape':
-                // Draw grape texture with small circles
-                ctx.fillStyle = 'rgba(123, 31, 162, 0.5)';
-                for (let row = 0; row < 3; row++) {
-                    for (let col = 0; col < 3; col++) {
-                        const grapeX = x + (col - 1) * radius * 0.3;
-                        const grapeY = y + (row - 1) * radius * 0.3;
-                        ctx.beginPath();
-                        ctx.arc(grapeX, grapeY, radius * 0.15, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-                break;
-                
-            case 'orange':
-                // Draw orange segments
-                ctx.strokeStyle = fruitType.darkColor;
-                ctx.lineWidth = 1;
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + Math.cos(angle) * radius * 0.8, y + Math.sin(angle) * radius * 0.8);
-                    ctx.stroke();
-                }
-                // Add orange texture
-                ctx.fillStyle = 'rgba(255, 152, 0, 0.3)';
-                for (let i = 0; i < 20; i++) {
-                    const dotX = x + (Math.random() - 0.5) * radius * 1.5;
-                    const dotY = y + (Math.random() - 0.5) * radius * 1.5;
-                    if (Math.sqrt((dotX - x) ** 2 + (dotY - y) ** 2) < radius * 0.8) {
-                        ctx.beginPath();
-                        ctx.arc(dotX, dotY, 0.5, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-                break;
-                
-            case 'persimmon':
-                // Draw persimmon star pattern on top
-                ctx.fillStyle = '#8bc34a';
+                // Add strawberry top leaves (calyx)
+                ctx.fillStyle = '#2e7d32';
+                // Draw star-shaped calyx
                 ctx.beginPath();
-                ctx.moveTo(x, y - radius);
-                for (let i = 0; i < 6; i++) {
-                    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-                    const starX = x + Math.cos(angle) * radius * 0.4;
-                    const starY = y - radius + 3;
-                    ctx.lineTo(starX, starY);
+                for (let i = 0; i < 10; i++) {
+                    const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
+                    const r = i % 2 === 0 ? radius * 0.5 : radius * 0.25;
+                    const leafX = x + Math.cos(angle) * r;
+                    const leafY = y - radius * 0.7 + Math.sin(angle) * r * 0.5;
+                    if (i === 0) {
+                        ctx.moveTo(leafX, leafY);
+                    } else {
+                        ctx.lineTo(leafX, leafY);
+                    }
                 }
                 ctx.closePath();
                 ctx.fill();
                 break;
                 
-            case 'apple':
-                // Draw apple leaf
-                ctx.fillStyle = '#4caf50';
+            case 'grape':
+                // Draw grape cluster
+                const grapePositions = [
+                    {gx: 0, gy: -0.6, size: 0.35},  // Top
+                    {gx: -0.4, gy: -0.3, size: 0.35}, {gx: 0.4, gy: -0.3, size: 0.35},  // Second row
+                    {gx: -0.6, gy: 0.1, size: 0.35}, {gx: 0, gy: 0.1, size: 0.35}, {gx: 0.6, gy: 0.1, size: 0.35},  // Third row
+                    {gx: -0.4, gy: 0.5, size: 0.35}, {gx: 0.4, gy: 0.5, size: 0.35},  // Fourth row
+                    {gx: 0, gy: 0.8, size: 0.35}  // Bottom
+                ];
+                
+                for (let grape of grapePositions) {
+                    const grapeX = x + grape.gx * radius;
+                    const grapeY = y + grape.gy * radius;
+                    const grapeRadius = grape.size * radius;
+                    
+                    // Grape shadow/depth
+                    ctx.fillStyle = '#4a148c';
+                    ctx.beginPath();
+                    ctx.arc(grapeX, grapeY, grapeRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Main grape
+                    ctx.fillStyle = '#7b1fa2';
+                    ctx.beginPath();
+                    ctx.arc(grapeX, grapeY, grapeRadius * 0.95, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Highlight
+                    ctx.fillStyle = 'rgba(186, 104, 200, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(grapeX - grapeRadius * 0.3, grapeY - grapeRadius * 0.3, grapeRadius * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                break;
+                
+            case 'orange':
+                // Draw orange shape (perfect circle)
+                ctx.fillStyle = '#ff9800';
                 ctx.beginPath();
-                ctx.ellipse(x - 3, y - radius + 2, 3, 6, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
                 ctx.fill();
-                // Add apple stem
+                
+                // Draw orange peel texture (dimples)
+                ctx.fillStyle = '#ffcc02';
+                for (let i = 0; i < 20; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.random() * radius * 0.8;
+                    const dotX = x + Math.cos(angle) * dist;
+                    const dotY = y + Math.sin(angle) * dist;
+                    
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Add orange segments (light lines)
+                ctx.strokeStyle = '#ff8f00';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(
+                        x + Math.cos(angle) * radius * 0.8,
+                        y + Math.sin(angle) * radius * 0.8
+                    );
+                    ctx.stroke();
+                }
+                break;
+                
+            case 'persimmon':
+                // Draw persimmon shape (flattened, like 🥭 but orange)
+                ctx.fillStyle = '#ff6f00'; // Deep orange, different from regular orange
+                ctx.beginPath();
+                ctx.ellipse(x, y, radius * 1.2, radius * 0.7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add darker orange gradient
+                ctx.fillStyle = '#e65100';
+                ctx.beginPath();
+                ctx.ellipse(x, y + radius * 0.2, radius * 1.1, radius * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add persimmon calyx (star-shaped top)
+                ctx.fillStyle = '#2e7d32';
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i / 4) * Math.PI * 2 - Math.PI / 2;
+                    const leafX = x + Math.cos(angle) * radius * 0.4;
+                    const leafY = y - radius * 0.6;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(leafX, leafY);
+                    ctx.lineTo(leafX + Math.cos(angle) * radius * 0.3, leafY - radius * 0.2);
+                    ctx.lineTo(leafX - Math.cos(angle + Math.PI/2) * radius * 0.15, leafY);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                // Central calyx point
+                ctx.fillStyle = '#1b5e20';
+                ctx.beginPath();
+                ctx.arc(x, y - radius * 0.6, radius * 0.08, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'apple':
+                // Draw apple shape (slightly heart-shaped top)
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                ctx.moveTo(x, y + radius);
+                ctx.quadraticCurveTo(x - radius, y + radius * 0.3, x - radius * 0.8, y - radius * 0.3);
+                ctx.quadraticCurveTo(x - radius * 0.3, y - radius * 0.9, x, y - radius * 0.7);
+                ctx.quadraticCurveTo(x + radius * 0.3, y - radius * 0.9, x + radius * 0.8, y - radius * 0.3);
+                ctx.quadraticCurveTo(x + radius, y + radius * 0.3, x, y + radius);
+                ctx.fill();
+                
+                // Apple stem
                 ctx.strokeStyle = '#8d6e63';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.moveTo(x, y - radius);
-                ctx.lineTo(x, y - radius - 4);
+                ctx.moveTo(x, y - radius * 0.7);
+                ctx.lineTo(x, y - radius * 1.1);
                 ctx.stroke();
-                // Add apple dimple
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                
+                // Apple leaf
                 ctx.beginPath();
-                ctx.arc(x, y - radius + 3, 2, 0, Math.PI * 2);
+                ctx.ellipse(x + radius * 0.2, y - radius * 1, radius * 0.15, radius * 0.3, Math.PI / 4, 0, Math.PI * 2);
                 ctx.fill();
                 break;
                 
             case 'pear':
-                // Draw pear shape variation (more narrow at top)
+                // Draw pear shape (narrow top, wide bottom)
                 ctx.fillStyle = fruitType.color;
                 ctx.beginPath();
-                ctx.ellipse(x, y - radius * 0.3, radius * 0.7, radius * 0.4, 0, 0, Math.PI * 2);
+                // Bottom bulb
+                ctx.arc(x, y + radius * 0.3, radius * 0.8, 0, Math.PI * 2);
                 ctx.fill();
-                // Add pear stem
+                // Top neck
+                ctx.beginPath();
+                ctx.ellipse(x, y - radius * 0.4, radius * 0.4, radius * 0.6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Pear stem
                 ctx.strokeStyle = '#8d6e63';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -288,7 +438,21 @@ class SuicaGame {
                 break;
                 
             case 'peach':
-                // Draw peach fuzz texture
+                // Draw peach shape (round with groove)
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Peach groove/crease
+                ctx.strokeStyle = '#ff5722';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y - radius * 0.9);
+                ctx.quadraticCurveTo(x + radius * 0.3, y, x, y + radius * 0.9);
+                ctx.stroke();
+                
+                // Peach fuzz texture
                 ctx.fillStyle = 'rgba(255, 183, 197, 0.4)';
                 for (let i = 0; i < 30; i++) {
                     const fuzzX = x + (Math.random() - 0.5) * radius * 1.8;
@@ -299,16 +463,15 @@ class SuicaGame {
                         ctx.fill();
                     }
                 }
-                // Add peach crease
-                ctx.strokeStyle = 'rgba(255, 138, 101, 0.6)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(x, y - radius);
-                ctx.lineTo(x, y + radius);
-                ctx.stroke();
                 break;
                 
             case 'pineapple':
+                // Draw pineapple body shape (oval)
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                ctx.ellipse(x, y + radius * 0.2, radius * 0.8, radius * 1.1, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
                 // Draw pineapple diamond pattern
                 ctx.strokeStyle = '#ff8f00';
                 ctx.lineWidth = 1;
@@ -327,19 +490,28 @@ class SuicaGame {
                         }
                     }
                 }
-                // Add pineapple crown
-                ctx.fillStyle = '#4caf50';
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const crownX = x + Math.cos(angle) * radius * 0.2;
-                    const crownY = y - radius;
+                // Add pineapple crown (spiky leaves)
+                ctx.fillStyle = '#2e7d32';
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+                    const leafX = x + Math.cos(angle) * radius * 0.3;
+                    const leafY = y - radius * 1.2;
                     ctx.beginPath();
-                    ctx.ellipse(crownX, crownY, 2, 8, angle, 0, Math.PI * 2);
+                    ctx.moveTo(leafX, leafY + radius * 0.5);
+                    ctx.lineTo(leafX + Math.cos(angle) * radius * 0.2, leafY - radius * 0.3);
+                    ctx.lineTo(leafX - Math.cos(angle) * radius * 0.1, leafY + radius * 0.2);
+                    ctx.closePath();
                     ctx.fill();
                 }
                 break;
                 
             case 'melon':
+                // Draw melon shape (round)
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
                 // Draw melon net pattern
                 ctx.strokeStyle = '#388e3c';
                 ctx.lineWidth = 1;
@@ -358,22 +530,35 @@ class SuicaGame {
                 break;
                 
             case 'watermelon':
+                // Draw watermelon shape (round)
+                ctx.fillStyle = fruitType.color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
                 // Draw watermelon stripes
                 ctx.strokeStyle = '#1b5e20';
                 ctx.lineWidth = 3;
-                for (let i = -2; i <= 2; i++) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, radius - Math.abs(i) * 8, 0, Math.PI * 2);
-                    ctx.stroke();
+                for (let i = 0; i < 5; i++) {
+                    const stripeRadius = radius * (0.3 + i * 0.15);
+                    if (stripeRadius < radius) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, stripeRadius, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
                 }
+                
                 // Add watermelon seeds
                 ctx.fillStyle = '#000';
-                for (let i = 0; i < 6; i++) {
-                    const angle = (i / 6) * Math.PI * 2;
-                    const seedX = x + Math.cos(angle) * radius * 0.4;
-                    const seedY = y + Math.sin(angle) * radius * 0.4;
+                const watermelonSeeds = [
+                    {sx: 0, sy: 0}, {sx: 0.3, sy: 0.2}, {sx: -0.3, sy: 0.2},
+                    {sx: 0.2, sy: -0.3}, {sx: -0.2, sy: -0.3}, {sx: 0, sy: 0.4}
+                ];
+                for (let pos of watermelonSeeds) {
+                    const seedX = x + pos.sx * radius;
+                    const seedY = y + pos.sy * radius;
                     ctx.beginPath();
-                    ctx.ellipse(seedX, seedY, 2, 3, angle, 0, Math.PI * 2);
+                    ctx.ellipse(seedX, seedY, 2, 4, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 break;

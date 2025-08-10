@@ -1,0 +1,35 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Strawberry body -->
+  <path d="M50 20 Q30 25 25 45 Q25 65 35 80 Q45 90 50 95 Q55 90 65 80 Q75 65 75 45 Q70 25 50 20" fill="#c62828" />
+  <path d="M50 20 Q30 25 25 45 Q25 65 35 80 Q45 90 50 93 Q55 90 65 80 Q75 65 75 45 Q70 25 50 20" fill="#ff5252" />
+  
+  <!-- Seeds -->
+  <ellipse cx="35" cy="40" rx="2" ry="3" fill="#ffeb3b" transform="rotate(20 35 40)" />
+  <ellipse cx="45" cy="35" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-10 45 35)" />
+  <ellipse cx="55" cy="38" rx="2" ry="3" fill="#ffeb3b" transform="rotate(15 55 38)" />
+  <ellipse cx="65" cy="42" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-20 65 42)" />
+  <ellipse cx="40" cy="50" rx="2" ry="3" fill="#ffeb3b" transform="rotate(10 40 50)" />
+  <ellipse cx="50" cy="48" rx="2" ry="3" fill="#ffeb3b" transform="rotate(0 50 48)" />
+  <ellipse cx="60" cy="52" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-15 60 52)" />
+  <ellipse cx="35" cy="60" rx="2" ry="3" fill="#ffeb3b" transform="rotate(25 35 60)" />
+  <ellipse cx="45" cy="62" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-5 45 62)" />
+  <ellipse cx="55" cy="65" rx="2" ry="3" fill="#ffeb3b" transform="rotate(20 55 65)" />
+  <ellipse cx="65" cy="60" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-25 65 60)" />
+  <ellipse cx="42" cy="75" rx="2" ry="3" fill="#ffeb3b" transform="rotate(15 42 75)" />
+  <ellipse cx="52" cy="78" rx="2" ry="3" fill="#ffeb3b" transform="rotate(-10 52 78)" />
+  <ellipse cx="58" cy="75" rx="2" ry="3" fill="#ffeb3b" transform="rotate(10 58 75)" />
+  
+  <!-- Highlight -->
+  <ellipse cx="38" cy="35" rx="8" ry="12" fill="#ff8a80" opacity="0.5" transform="rotate(-20 38 35)" />
+  
+  <!-- Leaves -->
+  <path d="M50 20 Q45 15 40 18 Q44 22 48 20" fill="#66bb6a" />
+  <path d="M50 20 Q52 13 55 15 Q53 20 50 20" fill="#4caf50" />
+  <path d="M50 20 Q55 15 60 18 Q56 22 52 20" fill="#66bb6a" />
+  <path d="M50 20 Q48 13 45 15 Q47 20 50 20" fill="#4caf50" />
+  <path d="M50 20 Q44 17 42 20 Q45 22 48 20" fill="#81c784" />
+  <path d="M50 20 Q56 17 58 20 Q55 22 52 20" fill="#81c784" />
+  
+  <!-- Stem -->
+  <circle cx="50" cy="20" r="2" fill="#388e3c" />
+</svg>
